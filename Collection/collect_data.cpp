@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <string.h>
+// #include <cstdlib>
 #include <math.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
@@ -23,6 +24,7 @@ MPU6050 mpu;
 //#define OUTPUT_READABLE_YAWPITCHROLL
 #define OUTPUT_READABLE_REALACCEL
 //#define OUTPUT_READABLE_WORLDACCEL
+#define START_DELAY 5000 // time  in ms
 
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
@@ -85,18 +87,13 @@ void setup() {
     // load and configure the DMP
     printf("Initializing DMP...\n");
     devStatus = mpu.dmpInitialize();
-    
-    mpu.setXAccelOffset(-2757);
-    mpu.setYAccelOffset(417);
-    mpu.setZAccelOffset(1191);
-    
-    mpu.setXGyroOffset(-609);
-    mpu.setYGyroOffset(-474);
-    mpu.setZGyroOffset(415);
-    // My offsets
-    //            XAccel			     YAccel				   ZAccel			               XGyro			          YGyro			              ZGyro
-    //[-2679,-2678] --> [-15,1]	[398,398] --> [-1,2]	[1205,1206] --> [16381,16391]	[-116,-115] --> [-4,2]	[69,70] --> [0,3]	[-93,-92] --> [0,3]
-    
+ 
+    mpu.setXAccelOffset(33);
+    mpu.setYAccelOffset(29);
+    mpu.setZAccelOffset(61);
+    mpu.setXGyroOffset(-105);
+    mpu.setYGyroOffset(1443);
+    mpu.setZGyroOffset(4945);
 
     // make sure it worked (returns 0 if so)
     if (devStatus == 0) {
@@ -138,10 +135,10 @@ void loop() {
     useconds = end.tv_usec - start.tv_usec;
     timestart = ((seconds) * 1000 + useconds/1000.0) + 0.5;
     
-    if(timestart>25000)
+    if(timestart>START_DELAY)
         digitalWrite(lgreen,HIGH);
         
-    if (digitalRead(button)==true && timestart>25000){
+    if (digitalRead(button)==true && timestart>START_DELAY){
         gettimeofday(&startb, NULL);
         
         while(digitalRead(button)){
@@ -151,7 +148,8 @@ void loop() {
             timestartb = ((secondsb) * 1000 + usecondsb/1000.0) + 0.5;
             
             if(timestartb>5000&&state!=1){
-                execl("/usr/bin/sudo","sudo","shutdown","-h","now",NULL);
+                // execl("/usr/bin/sudo","sudo","shutdown","-h","now",NULL);
+                std::exit(1);
                 return;
             }
         }
@@ -169,7 +167,7 @@ void loop() {
             digitalWrite(lred,LOW);
             DIR *d;
             struct dirent *dir;
-            d = opendir ("/home/pi/MPU6050-Pi-Demo/Datas");
+            d = opendir ("Data");
             int dir_len=0;
             if (d != NULL){
                 while ((dir = readdir(d)) != NULL)
@@ -180,7 +178,7 @@ void loop() {
             }  
 
             printf("%d",dir_len);
-            namepaste="/home/pi/MPU6050-Pi-Demo/Datas/data_"+std::to_string(dir_len-2);
+            namepaste="Data/data_"+std::to_string(dir_len-2);
             printf(namepaste.c_str());
 
             std::string new_dir = namepaste;

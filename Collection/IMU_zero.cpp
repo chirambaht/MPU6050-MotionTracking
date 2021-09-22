@@ -106,7 +106,7 @@ void Initialize()
 void SetAveraging(int NewN)
 { 
 	N = NewN;
-	printf("averaging %d  readings each time\n", N);
+	printf("\nAveraging %d readings each time\n", N);
 } // SetAveraging
 
 void SetOffsets(int TheOffsets[6])
@@ -141,6 +141,18 @@ void ShowProgress()
 			printf("]\t"); 
 		}
 	}
+
+	printf("Good advice would be to use the lower bounds e.g: Accelerometer: [X,Y,Z] and Gyroscope: [X, Y, Z]\n");
+	char param[3] = {'X', 'Y', 'Z'};
+	for (int i = 0; i < 3; i++){
+		printf("Accelerometer %c: %6d or %6d\n", param[i], LowOffset[i+3], HighOffset[i+3]);
+	}
+
+	for (int i = 0; i < 3; i++){
+		printf("Gyroscope %c: %6d or %6d\n", param[i],  LowOffset[i], HighOffset[i]);
+	}
+	printf("\nOr just use the following: \n");
+	printf("mpu.setXAccelOffset(%d);\nmpu.setYAccelOffset(%d);\nmpu.setZAccelOffset(%d);\nmpu.setXGyroOffset(%d);\nmpu.setYGyroOffset(%d);\nmpu.setZGyroOffset(%d);\n", LowOffset[3], LowOffset[4], LowOffset[5], LowOffset[0], LowOffset[1], LowOffset[2]);
 	LinesOut++;
 } // ShowProgress
 
@@ -150,7 +162,7 @@ void PullBracketsIn()
 	bool StillWorking;
 	int NewOffset[6];
 
-	printf("\nclosing in:\n");
+	printf("\nClosing in on the true zero values\n");
 	AllBracketsNarrow = false;
 	ForceHeader();
 	StillWorking = true;
@@ -200,7 +212,7 @@ void PullBracketsIn()
 				LowValue[i] = Smoothed[i];
 			} // use upper half
 		} // closing in
-		ShowProgress();
+		// ShowProgress();
 	} // still working
 } // PullBracketsIn
 
@@ -210,7 +222,7 @@ void PullBracketsOut()
 	int NextLowOffset[6];
 	int NextHighOffset[6];
 
-	printf("expanding:\n");
+	printf("Finding extremes of the zero points for the IMU gyroscope and accelerometer:\n");
 	ForceHeader();
 
 	while (!Done)
@@ -249,7 +261,7 @@ void PullBracketsOut()
 				NextHighOffset[i] = HighOffset[i]; 
 			}
 		} // got high values
-		ShowProgress();
+		// ShowProgress();
 		for (int i = iAx; i <= iGz; i++)
 		{ 
 			LowOffset[i] = NextLowOffset[i];   // had to wait until ShowProgress done
@@ -273,8 +285,8 @@ int main(int argc, char **argv)
 	SetAveraging(NFast);
 	PullBracketsOut();
 	PullBracketsIn();
-
-	printf("-------------- done --------------\n\n");
+	ShowProgress();
+	printf("-------------- Done --------------\n\n");
 	return 0;
 }
 
