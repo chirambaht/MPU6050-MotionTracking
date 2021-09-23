@@ -3,7 +3,6 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <string.h>
-// #include <cstdlib>
 #include <math.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
@@ -17,14 +16,16 @@
 
 MPU6050 mpu;
 
-#define OUTPUT_READABLE_ACCEL
-#define OUTPUT_READABLE_GYRO
-#define OUTPUT_READABLE_QUATERNION
-//#define OUTPUT_READABLE_EULER
-//#define OUTPUT_READABLE_YAWPITCHROLL
-#define OUTPUT_READABLE_REALACCEL
-//#define OUTPUT_READABLE_WORLDACCEL
-#define START_DELAY 5000 // time  in ms
+// This is the definitions section. By defining a variable here, the requested data will be made available in the next compiled run of the programs
+
+#define OUTPUT_READABLE_ACCEL           // Acceleration Data will be recorded
+// #define OUTPUT_READABLE_GYRO            // Gyroscope data will be recorded 
+// #define OUTPUT_READABLE_QUATERNION      // Quaternion data will be recoreded
+//#define OUTPUT_READABLE_EULER         // Euler angle data will be recorded
+//#define OUTPUT_READABLE_YAWPITCHROLL  // Yaw, Pitch and Roll Data will be recorded
+#define OUTPUT_READABLE_REALACCEL       // Acceleration data with no gravity included
+#define OUTPUT_READABLE_WORLDACCEL    // Acceleration knowing position from quaternion and gravity removed
+#define START_DELAY 2000                // Start wait time in ms
 
 // MPU control/status vars
 bool dmpReady = false;  // set true if DMP init was successful
@@ -147,9 +148,12 @@ void loop() {
             usecondsb = endb.tv_usec - startb.tv_usec;
             timestartb = ((secondsb) * 1000 + usecondsb/1000.0) + 0.5;
             
-            if(timestartb>5000&&state!=1){
-                // execl("/usr/bin/sudo","sudo","shutdown","-h","now",NULL);
-                std::exit(1);
+            if(timestartb>3000&&state!=1){
+                // Turn off LEDs
+                digitalWrite(lgreen,LOW);
+                digitalWrite(lred,LOW);
+                
+                std::exit(1); // Stops the program from collecting data
                 return;
             }
         }
@@ -243,18 +247,18 @@ void loop() {
         useconds = endc.tv_usec - startc.tv_usec;
         mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
         // display time in milliseconds
-        printf("\ntime %ld ms    ",mtime);
+        state ? printf("\ntime %ld ms    ",mtime) : 1 ;
         
         #ifdef OUTPUT_READABLE_ACCEL
             // display accel values in easy matrix form: x y z
             mpu.dmpGetAccel(&acc, fifoBuffer);
-            printf("accel  %6d %6d %6d    ",acc.x,acc.y,acc.z);
+            // printf("accel  %6d %6d %6d    ",acc.x,acc.y,acc.z);
         #endif
         
         #ifdef OUTPUT_READABLE_GYRO
             // display accel values in easy matrix form: x y z
             mpu.dmpGetGyro(&gyr, fifoBuffer);
-            printf("gryro  %6d %6d %6d    ",gyr.x,gyr.y,gyr.z);
+            // printf("gryro  %6d %6d %6d    ",gyr.x,gyr.y,gyr.z);
         #endif
         
         #ifdef OUTPUT_READABLE_QUATERNION
