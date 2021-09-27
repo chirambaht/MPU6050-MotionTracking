@@ -1,12 +1,12 @@
 # You need to "sudo apt-get install libgtkmm-3.0-dev" to build the demo_3d binary
 
-all: clean collect_data
+all: collect_data
 
-HDRS = helper_3dmath.h I2Cdev.h MPU6050_6Axis_MotionApps20.h MPU6050.h
+HDRS = helper_3dmath.h I2Cdev.h MPU6050_6Axis_MotionApps20.h MPU6050.h packager.h
 CMN_OBJS = I2Cdev.o MPU6050.o
-CLD_OBJS = collect_data.o
-IMU_OBJS = IMU_zero.o
+CLD_OBJS = collect_data.o packager.o
 
+IMU_OBJS = IMU_zero.o 
 # Set DMP FIFO rate to 100Hz.  See comments in
 # MPU6050_6Axis_MotionApps20.h for details.
 
