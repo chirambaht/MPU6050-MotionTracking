@@ -13,16 +13,18 @@
 #include <sys/timeb.h>
 #include <sys/time.h>
 #include <wiringPi.h>
+#include "packager.h"
 
+using namespace IMU_Tools;
 MPU6050 mpu;
 
 // This is the definitions section. By defining a variable here, the requested data will be made available in the next compiled run of the programs
 
 #define OUTPUT_READABLE_ACCEL           // Acceleration Data will be recorded
-// #define OUTPUT_READABLE_GYRO            // Gyroscope data will be recorded 
-// #define OUTPUT_READABLE_QUATERNION      // Quaternion data will be recoreded
-//#define OUTPUT_READABLE_EULER         // Euler angle data will be recorded
-//#define OUTPUT_READABLE_YAWPITCHROLL  // Yaw, Pitch and Roll Data will be recorded
+#define OUTPUT_READABLE_GYRO            // Gyroscope data will be recorded 
+#define OUTPUT_READABLE_QUATERNION      // Quaternion data will be recoreded
+#define OUTPUT_READABLE_EULER         // Euler angle data will be recorded
+#define OUTPUT_READABLE_YAWPITCHROLL  // Yaw, Pitch and Roll Data will be recorded
 #define OUTPUT_READABLE_REALACCEL       // Acceleration data with no gravity included
 #define OUTPUT_READABLE_WORLDACCEL    // Acceleration knowing position from quaternion and gravity removed
 #define START_DELAY 2000                // Start wait time in ms
@@ -49,6 +51,9 @@ int lred=2,lgreen=0,button=3;
 bool state=0;
 // packet structure for InvenSense teapot demo
 uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
+
+Packager pk = Packager("192.168.137.1", 9022);
+
 
 FILE    *arq_Accel,
         *arq_Gyro,
@@ -207,6 +212,7 @@ void loop() {
             
             arq_Quaternions = fopen(Data_Quaternions.c_str(),"wt");
             fprintf(arq_Quaternions,"time,qw,qx,qy,qz\n");
+
             
             //arq_Euler = fopen(Data_Euler.c_str(),"wt");
             //fprintf(arq_Euler,"time,alfa,beta,gama\n");
@@ -264,7 +270,12 @@ void loop() {
         #ifdef OUTPUT_READABLE_QUATERNION
             // display quaternion values in easy matrix form: w x y z
             mpu.dmpGetQuaternion(&q, fifoBuffer);
-            //printf("quat %7.5f %7.5f %7.5f %7.5f    ", q.w,q.x,q.y,q.z);
+            
+            float d[4] = {q.w,q.x,q.y,q.z};
+
+            pk.send_packet(d);
+
+            printf("quat %7.5f %7.5f %7.5f %7.5f    ", q.w,q.x,q.y,q.z);
             // save quaternion values 
             //fprintf(arq_Quaternions,"%ld,%7.2f,%7.2f,%7.2f,%7.2f\n",mtime,q.w,q.x,q.y,q.z);
         #endif
@@ -283,7 +294,7 @@ void loop() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            printf("ypr  %7.2f %7.2f %7.2f    ", ypr[0] * 180/M_PI, ypr[1] * 180/M_PI, ypr[2] * 180/M_PI);
+            // printf("ypr  %7.2f %7.2f %7.2f    ", ypr[0] * 180/M_PI, ypr[1] * 180/M_PI, ypr[2] * 180/M_PI);
         #endif
 
         #ifdef OUTPUT_READABLE_REALACCEL
@@ -304,7 +315,7 @@ void loop() {
             mpu.dmpGetAccel(&acc, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetLinearAccelInWorld(&accWorld, &accReal, &q);
-            printf("world  %6d %6d %6d     ",accWorld.x,accWorld.y,accWorld.z);
+            // printf("world  %6d %6d %6d     ",accWorld.x,accWorld.y,accWorld.z);
             // save initial word-frame acceleration
             //fprintf(arq_WorldAcc,"%ld,%7.2f,%7.2f,%7.2f\n", mtime, (double) aaWorld.x/4096, (double) aaWorld.y/4096, (double) (aaWorld.z-4096)/4096);
         #endif
