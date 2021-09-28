@@ -1,4 +1,6 @@
-﻿# Information
+﻿## This projet is a fork between @Edubgr's original. This work aims to allow the original project to send data over a network using UDP. To acheive this, the packager.h and packager.cpp files were added.
+
+# Information
 This code is an update of Richard's code (https://github.com/richardghirst/PiBits/tree/master/MPU6050-Pi-Demo) which in turn is a modification of Jeff Rowberg's code so that the library works on the Raspberry Pi.
 
 Copyright (c) 2012 Jeff Rowberg, and copied from

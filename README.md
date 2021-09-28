@@ -1,4 +1,6 @@
-﻿# Description
+﻿## This projet is a fork between @Edubgr's original. This work aims to allow the original project to send data over a network using UDP.
+
+# Description
 This program was designed to determine the position and rotation of a body using the **MPU6050** and a **Raspberry Pi**.
 
 From the acceleration and quaternion values ​​obtained by the sensor, it is possible to determine the **rotation, position and velocity** of a body, using due processes. The program is still a robust version, which needs some improvements. Long movements with few pauses tend to have poor accuracy for position and velocity, due to the drift obtained by integrating acceleration data. However, rotation works in all cases, obtaining a rotation identical to the rotation performed by the body.
